@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>webrtcdevelopment native chrome demo</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      margin: 1rem;
+      background: #f5f7fa;
+      color: #1d2733;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+
+    video {
+      width: 100%;
+      border-radius: 8px;
+      background: #0d1117;
+    }
+
+    button {
+      margin-right: 0.5rem;
+      margin-top: 0.75rem;
+      padding: 0.45rem 0.8rem;
+    }
+
+    pre {
+      background: #0f1720;
+      color: #e6edf3;
+      padding: 0.75rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      min-height: 100px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Native Chrome WebRTC Demo</h1>
+  <p>Open this page in two tabs. Copy offer/answer JSON between tabs manually.</p>
+
+  <div class="row">
+    <div>
+      <h3>Local</h3>
+      <video id="myAloneVideo" playsinline autoplay muted></video>
+    </div>
+    <div>
+      <h3>Remote</h3>
+      <video id="myConferenceVideo" playsinline autoplay></video>
+    </div>
+  </div>
+
+  <div>
+    <button id="btnStart">Create Offer</button>
+    <button id="btnAnswer">Create Answer From Offer</button>
+    <button id="btnApplyAnswer">Apply Answer</button>
+    <button id="btnScreen">Share Screen</button>
+  </div>
+
+  <p>Paste remote signal JSON here:</p>
+  <textarea id="signalInput" rows="7" style="width:100%"></textarea>
+  <p>Local signal JSON:</p>
+  <pre id="signalOutput"></pre>
+
+  <script type="module">
+    import { WebRTCDevelopmentNative } from "../src/webrtcdevelopment-native.js";
+
+    const config = {
+      local: {
+        video: "myAloneVideo",
+        videoContainer: "singleVideoContainer",
+        userdetails: { username: "alice", useremail: "alice@example.com", role: "participant" }
+      },
+      remote: {
+        videoarr: ["myConferenceVideo"],
+        maxAllowed: "6",
+        videoContainer: "confVideoContainer"
+      },
+      incoming: { audio: true, video: true, data: true, screen: true },
+      outgoing: { audio: true, video: true, data: true, screen: true },
+      session: {
+        id: "demo-session",
+        rtcConfiguration: {
+          iceServers: [{ urls: ["stun:stun.l.google.com:19302"] }]
+        }
+      }
+    };
+
+    const output = document.getElementById("signalOutput");
+    const input = document.getElementById("signalInput");
+
+    const rtc = new WebRTCDevelopmentNative(config, {
+      onSignal: (signal) => {
+        output.textContent = JSON.stringify(signal, null, 2);
+      },
+      onData: (message) => {
+        console.log("datachannel", message);
+      }
+    });
+
+    document.getElementById("btnStart").addEventListener("click", async () => {
+      await rtc.startCall();
+    });
+
+    document.getElementById("btnAnswer").addEventListener("click", async () => {
+      const signal = JSON.parse(input.value);
+      if (signal.type !== "offer") {
+        alert("Expected an offer payload");
+        return;
+      }
+      await rtc.acceptOffer(signal.sdp);
+    });
+
+    document.getElementById("btnApplyAnswer").addEventListener("click", async () => {
+      const signal = JSON.parse(input.value);
+      if (signal.type !== "answer") {
+        alert("Expected an answer payload");
+        return;
+      }
+      await rtc.applyAnswer(signal.sdp);
+    });
+
+    document.getElementById("btnScreen").addEventListener("click", async () => {
+      await rtc.startScreenShare();
+    });
+  </script>
+</body>
+</html>

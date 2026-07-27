@@ -1,0 +1,58 @@
+{
+  "local": {
+    "video": "myAloneVideo",
+    "videoClass": "",
+    "videoContainer": "singleVideoContainer",
+    "userDisplay": false,
+    "userMetaDisplay": false,
+    "userdetails": {
+      "username": "alice",
+      "usercolor": "#DDECEF",
+      "useremail": "alice@example.com",
+      "role": "participant"
+    }
+  },
+  "remote": {
+    "videoarr": [
+      "myConferenceVideo",
+      "otherConferenceVideo"
+    ],
+    "videoClass": "",
+    "maxAllowed": "6",
+    "videoContainer": "confVideoContainer",
+    "userDisplay": false,
+    "userMetaDisplay": false,
+    "dynamicVideos": false
+  },
+  "incoming": {
+    "audio": true,
+    "video": true,
+    "data": true,
+    "screen": true
+  },
+  "outgoing": {
+    "audio": true,
+    "video": true,
+    "data": true,
+    "screen": true
+  },
+  "session": {
+    "id": "demo-session-001",
+    "rtcConfiguration": {
+      "iceServers": [
+        {
+          "urls": [
+            "stun:stun.l.google.com:19302"
+          ]
+        },
+        {
+          "urls": [
+            "turn:turn.example.com:3478"
+          ],
+          "username": "turn-user",
+          "credential": "turn-password"
+        }
+      ]
+    }
+  }
+}
