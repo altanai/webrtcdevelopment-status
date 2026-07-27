@@ -54,5 +54,25 @@
         }
       ]
     }
+  },
+  "avtcore": {
+    "preferredAudioCodecs": [
+      "audio/opus"
+    ],
+    "preferredVideoCodecs": [
+      "video/VP9",
+      "video/H264"
+    ],
+    "audioMaxBitrate": 64000,
+    "videoMaxBitrate": 1500000,
+    "degradationPreference": "balanced",
+    "rtcpFeedbackProfiles": [
+      "transport-cc",
+      "nack pli"
+    ],
+    "headerExtensions": [
+      "urn:ietf:params:rtp-hdrext:sdes:mid",
+      "http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01"
+    ]
   }
 }

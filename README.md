@@ -2,6 +2,9 @@
 
 Status tracker for the npm package webrtcdevelopment.
 
+This repository is pure WebRTC (native browser APIs) and is intended to replace the existing npm library behavior incrementally.
+It does not require MoQ.
+
 [![Update package status](https://github.com/altanai/webrtcdevelopment-status/actions/workflows/update-status.yml/badge.svg)](https://github.com/altanai/webrtcdevelopment-status/actions/workflows/update-status.yml)
 
 ## What this repository tracks
@@ -42,6 +45,8 @@ The API supports configuration fields aligned with webrtcdevelopment npm docs:
 - outgoing
 - session (including rtcConfiguration.iceServers)
 
+It also includes optional `avtcore` extension hooks for codec preference and transport-tuning policies.
+
 Example config file:
 
 - config/webrtcdevelopment-config.example.json
@@ -49,6 +54,10 @@ Example config file:
 Example browser page:
 
 - examples/native-chrome-demo.html
+
+AVTCORE extensibility notes:
+
+- AVTCORE_EXTENSIBILITY.md
 
 Main class usage:
 

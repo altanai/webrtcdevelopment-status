@@ -73,6 +73,8 @@ export class WebRTCDevelopmentNative {
       });
     }
 
+    await this.applyAvtcorePolicies();
+
     if (this.config.outgoing.data) {
       this.dataChannel = this.peerConnection.createDataChannel("webrtcdevelopment-data");
       this.configureDataChannel();
@@ -97,6 +99,8 @@ export class WebRTCDevelopmentNative {
         this.peerConnection.addTrack(track, this.localStream);
       });
     }
+
+    await this.applyAvtcorePolicies();
 
     await this.peerConnection.setRemoteDescription({ type: "offer", sdp: offerSdp });
     const answer = await this.peerConnection.createAnswer();
@@ -153,6 +157,99 @@ export class WebRTCDevelopmentNative {
 
     const body = typeof payload === "string" ? payload : JSON.stringify(payload);
     this.dataChannel.send(body);
+  }
+
+  async applyAvtcorePolicies() {
+    if (!this.peerConnection) {
+      return;
+    }
+
+    const avt = this.config.avtcore;
+    if (!avt) {
+      return;
+    }
+
+    await this.applySenderEncodingPolicy(avt);
+    this.applyCodecPreferences(avt);
+  }
+
+  async applySenderEncodingPolicy(avt) {
+    const senders = this.peerConnection.getSenders();
+
+    for (const sender of senders) {
+      if (!sender.track) {
+        continue;
+      }
+
+      try {
+        const params = sender.getParameters() || {};
+        params.encodings = Array.isArray(params.encodings) && params.encodings.length > 0
+          ? params.encodings
+          : [{}];
+
+        const first = params.encodings[0];
+        if (avt.degradationPreference) {
+          first.degradationPreference = avt.degradationPreference;
+        }
+
+        if (sender.track.kind === "audio" && typeof avt.audioMaxBitrate === "number") {
+          first.maxBitrate = avt.audioMaxBitrate;
+        }
+
+        if (sender.track.kind === "video" && typeof avt.videoMaxBitrate === "number") {
+          first.maxBitrate = avt.videoMaxBitrate;
+        }
+
+        await sender.setParameters(params);
+      } catch (err) {
+        if (this.callbacks.onWarning) {
+          this.callbacks.onWarning(`Unable to apply sender policy for ${sender.track.kind}: ${String(err)}`);
+        }
+      }
+    }
+  }
+
+  applyCodecPreferences(avt) {
+    const transceivers = this.peerConnection.getTransceivers();
+    if (!transceivers || transceivers.length === 0 || !RTCRtpSender.getCapabilities) {
+      return;
+    }
+
+    for (const transceiver of transceivers) {
+      if (typeof transceiver.setCodecPreferences !== "function") {
+        continue;
+      }
+
+      const kind = transceiver.sender?.track?.kind;
+      if (!kind) {
+        continue;
+      }
+
+      const preferredMimeTypes = kind === "audio"
+        ? avt.preferredAudioCodecs
+        : avt.preferredVideoCodecs;
+
+      if (!Array.isArray(preferredMimeTypes) || preferredMimeTypes.length === 0) {
+        continue;
+      }
+
+      const capabilities = RTCRtpSender.getCapabilities(kind);
+      if (!capabilities || !Array.isArray(capabilities.codecs)) {
+        continue;
+      }
+
+      const normalized = preferredMimeTypes.map((m) => String(m).toLowerCase());
+      const preferred = capabilities.codecs.filter((c) =>
+        normalized.includes(String(c.mimeType || "").toLowerCase())
+      );
+
+      if (preferred.length === 0) {
+        continue;
+      }
+
+      const remaining = capabilities.codecs.filter((c) => !preferred.includes(c));
+      transceiver.setCodecPreferences([...preferred, ...remaining]);
+    }
   }
 
   close() {
@@ -264,6 +361,27 @@ export function normalizeConfig(config) {
           ? config.session.rtcConfiguration.iceServers
           : []
       }
+    },
+    avtcore: {
+      preferredAudioCodecs: Array.isArray(config.avtcore?.preferredAudioCodecs)
+        ? config.avtcore.preferredAudioCodecs
+        : [],
+      preferredVideoCodecs: Array.isArray(config.avtcore?.preferredVideoCodecs)
+        ? config.avtcore.preferredVideoCodecs
+        : [],
+      audioMaxBitrate: typeof config.avtcore?.audioMaxBitrate === "number"
+        ? config.avtcore.audioMaxBitrate
+        : null,
+      videoMaxBitrate: typeof config.avtcore?.videoMaxBitrate === "number"
+        ? config.avtcore.videoMaxBitrate
+        : null,
+      degradationPreference: config.avtcore?.degradationPreference || null,
+      rtcpFeedbackProfiles: Array.isArray(config.avtcore?.rtcpFeedbackProfiles)
+        ? config.avtcore.rtcpFeedbackProfiles
+        : [],
+      headerExtensions: Array.isArray(config.avtcore?.headerExtensions)
+        ? config.avtcore.headerExtensions
+        : []
     }
   };
 }
