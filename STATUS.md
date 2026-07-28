@@ -1,16 +1,16 @@
-﻿# Package Status: webrtcdevelopment
+# Package Status: webrtcdevelopment
 
 - Package: [webrtcdevelopment](https://www.npmjs.com/package/webrtcdevelopment)
 - Latest version: 6.19.9
 - License: MIT
-- Published at: 2021-09-01T21:54:40.327Z
-- Registry modified: 2022-06-29T00:22:45.788Z
+- Published at: 09/01/2021 21:54:40
+- Registry modified: 06/29/2022 00:22:45
 - Total versions: 515
 - Unpacked size: 2580672 bytes
 - File count: 38
 - Repository: git+https://github.com/altanai/webrtc.git
 - Homepage: https://github.com/altanai/webrtc#readme
-- Fetched at: 2026-07-27T11:38:50.8349460-07:00
+- Fetched at: 2026-07-28T06:11:48.3471031+00:00
 
 ## Maintainers
 - altanai <tara181989@gmail.com>

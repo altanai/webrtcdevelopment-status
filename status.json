@@ -1,35 +1,35 @@
-﻿{
-    "package":  "webrtcdevelopment",
-    "latestVersion":  "6.19.9",
-    "license":  "MIT",
-    "publishedAt":  "2021-09-01T21:54:40.327Z",
-    "modified":  "2022-06-29T00:22:45.788Z",
-    "totalVersions":  515,
-    "repositoryUrl":  "git+https://github.com/altanai/webrtc.git",
-    "homepage":  "https://github.com/altanai/webrtc#readme",
-    "npmUrl":  "https://www.npmjs.com/package/webrtcdevelopment",
-    "unpackedSize":  2580672,
-    "fileCount":  38,
-    "dependencies":  {
-                         "dotenv":  "^10.0.0",
-                         "gulp":  "^4.0.2",
-                         "gulp-babel-minify":  "^0.5.1",
-                         "gulp-clean-css":  "^4.3.0",
-                         "gulp-concat":  "^2.6.1",
-                         "gulp-header":  "^2.0.9",
-                         "gulp-replace":  "^1.1.3",
-                         "gulp-rev-timestamp":  "^0.0.1",
-                         "gulp-sourcemaps":  "^3.0.0",
-                         "log":  "^1.4.0",
-                         "node":  "^13.14.0",
-                         "redis":  "^3.1.2",
-                         "redis-server":  "^1.2.2",
-                         "remodal":  "^1.1.1",
-                         "restify":  "^8.5.1",
-                         "socket.io":  "^2.3.0"
-                     },
-    "maintainers":  [
-                        "altanai \u003ctara181989@gmail.com\u003e"
-                    ],
-    "fetchedAt":  "2026-07-27T11:38:50.8349460-07:00"
+{
+  "package": "webrtcdevelopment",
+  "latestVersion": "6.19.9",
+  "license": "MIT",
+  "publishedAt": "2021-09-01T21:54:40.327Z",
+  "modified": "2022-06-29T00:22:45.788Z",
+  "totalVersions": 515,
+  "repositoryUrl": "git+https://github.com/altanai/webrtc.git",
+  "homepage": "https://github.com/altanai/webrtc#readme",
+  "npmUrl": "https://www.npmjs.com/package/webrtcdevelopment",
+  "unpackedSize": 2580672,
+  "fileCount": 38,
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "gulp": "^4.0.2",
+    "gulp-babel-minify": "^0.5.1",
+    "gulp-clean-css": "^4.3.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-header": "^2.0.9",
+    "gulp-replace": "^1.1.3",
+    "gulp-rev-timestamp": "^0.0.1",
+    "gulp-sourcemaps": "^3.0.0",
+    "log": "^1.4.0",
+    "node": "^13.14.0",
+    "redis": "^3.1.2",
+    "redis-server": "^1.2.2",
+    "remodal": "^1.1.1",
+    "restify": "^8.5.1",
+    "socket.io": "^2.3.0"
+  },
+  "maintainers": [
+    "altanai <tara181989@gmail.com>"
+  ],
+  "fetchedAt": "2026-07-28T06:11:48.3471031+00:00"
 }
