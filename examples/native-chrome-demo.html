@@ -42,7 +42,7 @@
 </head>
 <body>
   <h1>Native Chrome WebRTC Demo</h1>
-  <p>Open this page in two tabs. Copy offer/answer JSON between tabs manually.</p>
+  <p>Open this page in two tabs. Copy the full local signal bundle between tabs manually.</p>
 
   <div class="row">
     <div>
@@ -59,13 +59,29 @@
     <button id="btnStart">Create Offer</button>
     <button id="btnAnswer">Create Answer From Offer</button>
     <button id="btnApplyAnswer">Apply Answer</button>
+    <button id="btnAddCandidate">Add ICE Candidate</button>
     <button id="btnScreen">Share Screen</button>
   </div>
 
-  <p>Paste remote signal JSON here:</p>
-  <textarea id="signalInput" rows="7" style="width:100%"></textarea>
-  <p>Local signal JSON:</p>
-  <pre id="signalOutput"></pre>
+  <div class="row">
+    <div>
+      <p>Remote offer JSON:</p>
+      <textarea id="offerInput" rows="7" style="width:100%"></textarea>
+      <p>Local offer JSON:</p>
+      <pre id="offerOutput"></pre>
+    </div>
+    <div>
+      <p>Remote answer JSON:</p>
+      <textarea id="answerInput" rows="7" style="width:100%"></textarea>
+      <p>Local answer JSON:</p>
+      <pre id="answerOutput"></pre>
+    </div>
+  </div>
+
+  <p>Remote ICE candidate JSON or candidate bundle:</p>
+  <textarea id="candidateInput" rows="7" style="width:100%"></textarea>
+  <p>Local ICE candidates JSON:</p>
+  <pre id="candidateOutput"></pre>
 
   <script type="module">
     import { WebRTCDevelopmentNative } from "../src/webrtcdevelopment-native.js";
@@ -91,12 +107,41 @@
       }
     };
 
-    const output = document.getElementById("signalOutput");
-    const input = document.getElementById("signalInput");
+    const offerInput = document.getElementById("offerInput");
+    const answerInput = document.getElementById("answerInput");
+    const candidateInput = document.getElementById("candidateInput");
+    const offerOutput = document.getElementById("offerOutput");
+    const answerOutput = document.getElementById("answerOutput");
+    const candidateOutput = document.getElementById("candidateOutput");
+    const localSignals = {
+      offer: null,
+      answer: null,
+      iceCandidates: []
+    };
+
+    function renderSignals() {
+      offerOutput.textContent = localSignals.offer ? JSON.stringify(localSignals.offer, null, 2) : "";
+      answerOutput.textContent = localSignals.answer ? JSON.stringify(localSignals.answer, null, 2) : "";
+      candidateOutput.textContent = localSignals.iceCandidates.length > 0
+        ? JSON.stringify(localSignals.iceCandidates, null, 2)
+        : "";
+    }
+
+    function parseJson(text) {
+      return JSON.parse(text);
+    }
 
     const rtc = new WebRTCDevelopmentNative(config, {
       onSignal: (signal) => {
-        output.textContent = JSON.stringify(signal, null, 2);
+        if (signal.type === "offer") {
+          localSignals.offer = signal;
+        } else if (signal.type === "answer") {
+          localSignals.answer = signal;
+        } else if (signal.type === "ice-candidate") {
+          localSignals.iceCandidates.push(signal);
+        }
+
+        renderSignals();
       },
       onData: (message) => {
         console.log("datachannel", message);
@@ -108,21 +153,45 @@
     });
 
     document.getElementById("btnAnswer").addEventListener("click", async () => {
-      const signal = JSON.parse(input.value);
-      if (signal.type !== "offer") {
+      const offer = parseJson(offerInput.value);
+
+      if (offer.type !== "offer") {
         alert("Expected an offer payload");
         return;
       }
-      await rtc.acceptOffer(signal.sdp);
+
+      await rtc.acceptOffer(offer.sdp);
     });
 
     document.getElementById("btnApplyAnswer").addEventListener("click", async () => {
-      const signal = JSON.parse(input.value);
-      if (signal.type !== "answer") {
+      const answer = parseJson(answerInput.value);
+
+      if (answer.type !== "answer") {
         alert("Expected an answer payload");
         return;
       }
-      await rtc.applyAnswer(signal.sdp);
+
+      await rtc.applyAnswer(answer.sdp);
+    });
+
+    document.getElementById("btnAddCandidate").addEventListener("click", async () => {
+      const signal = parseJson(candidateInput.value);
+
+      if (signal.type === "ice-candidate") {
+        await rtc.addIceCandidate(signal.candidate);
+        return;
+      }
+
+      if (Array.isArray(signal.iceCandidates)) {
+        for (const candidateSignal of signal.iceCandidates) {
+          if (candidateSignal.type === "ice-candidate") {
+            await rtc.addIceCandidate(candidateSignal.candidate);
+          }
+        }
+        return;
+      }
+
+      alert("Expected an ice-candidate payload or a signal bundle with iceCandidates");
     });
 
     document.getElementById("btnScreen").addEventListener("click", async () => {

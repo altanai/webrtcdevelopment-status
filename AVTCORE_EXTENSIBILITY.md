@@ -1,10 +1,6 @@
 # AVTCORE Extensibility Notes
 
-This library is intentionally pure WebRTC (browser-native APIs) and does not require MoQ.
-
-## Goal
-
-Provide extension points to align with IETF AVTCORE evolution while preserving the existing webrtcdevelopment-style config model.
+This library is intentionally pure WebRTC (browser-native APIs) also provides extension points to align with IETF AVTCORE evolution while preserving the existing webrtcdevelopment-style config model.
 
 ## Current extension hooks
 

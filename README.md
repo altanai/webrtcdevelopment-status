@@ -2,9 +2,6 @@
 
 Status tracker for the npm package webrtcdevelopment.
 
-This repository is pure WebRTC (native browser APIs) and is intended to replace the existing npm library behavior incrementally.
-It does not require MoQ.
-
 [![Update package status](https://github.com/altanai/webrtcdevelopment-status/actions/workflows/update-status.yml/badge.svg)](https://github.com/altanai/webrtcdevelopment-status/actions/workflows/update-status.yml)
 
 ## What this repository tracks
