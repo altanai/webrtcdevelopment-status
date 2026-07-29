@@ -52,9 +52,6 @@ Example browser page:
 
 - examples/native-chrome-demo.html
 
-AVTCORE extensibility notes:
-
-- AVTCORE_EXTENSIBILITY.md
 
 Main class usage:
 

@@ -14,18 +14,51 @@ export class WebRTCDevelopmentNative {
   }
 
   async initLocalMedia() {
-    const mediaConstraints = {
-      audio: !!this.config.outgoing.audio,
-      video: !!this.config.outgoing.video
-    };
+    const wantAudio = !!this.config.outgoing.audio;
+    const wantVideo = !!this.config.outgoing.video;
 
-    if (!mediaConstraints.audio && !mediaConstraints.video) {
+    if (!wantAudio && !wantVideo) {
       this.localStream = new MediaStream();
       return this.localStream;
     }
 
-    this.localStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
-    this.attachStreamToElement(this.localStream, this.config.local.video);
+    // Prefer full constraints, then fall back so a single missing device
+    // (e.g. no camera) does not abort the whole call.
+    const attempts = [];
+    if (wantAudio && wantVideo) {
+      attempts.push({ audio: true, video: true });
+      attempts.push({ audio: true, video: false });
+      attempts.push({ audio: false, video: true });
+    } else {
+      attempts.push({ audio: wantAudio, video: wantVideo });
+    }
+
+    let lastError = null;
+    for (const constraints of attempts) {
+      try {
+        this.localStream = await navigator.mediaDevices.getUserMedia(constraints);
+        if ((wantAudio && !constraints.audio) || (wantVideo && !constraints.video)) {
+          const missing = [
+            wantAudio && !constraints.audio ? "audio" : null,
+            wantVideo && !constraints.video ? "video" : null
+          ].filter(Boolean).join(" and ");
+          if (this.callbacks.onWarning) {
+            this.callbacks.onWarning(`Continuing without ${missing}: device unavailable.`);
+          }
+        }
+        this.attachStreamToElement(this.localStream, this.config.local.video);
+        return this.localStream;
+      } catch (err) {
+        lastError = err;
+      }
+    }
+
+    // No requested device could be acquired. Continue with an empty stream so
+    // data channel and screen sharing still work.
+    if (this.callbacks.onWarning) {
+      this.callbacks.onWarning(`No camera or microphone available: ${String(lastError)}. Continuing without local media.`);
+    }
+    this.localStream = new MediaStream();
     return this.localStream;
   }
 

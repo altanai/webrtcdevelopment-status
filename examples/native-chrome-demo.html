@@ -145,6 +145,9 @@
       },
       onData: (message) => {
         console.log("datachannel", message);
+      },
+      onWarning: (message) => {
+        console.warn("webrtcdevelopment", message);
       }
     });
 
@@ -177,21 +180,35 @@
     document.getElementById("btnAddCandidate").addEventListener("click", async () => {
       const signal = parseJson(candidateInput.value);
 
-      if (signal.type === "ice-candidate") {
-        await rtc.addIceCandidate(signal.candidate);
+      // Accept: a single ice-candidate object, a bare array of them
+      // (the shape shown in "Local ICE candidates JSON"), or a bundle
+      // object with an iceCandidates array.
+      let candidateSignals = null;
+
+      if (Array.isArray(signal)) {
+        candidateSignals = signal;
+      } else if (signal && signal.type === "ice-candidate") {
+        candidateSignals = [signal];
+      } else if (signal && Array.isArray(signal.iceCandidates)) {
+        candidateSignals = signal.iceCandidates;
+      }
+
+      if (!candidateSignals) {
+        alert("Expected an ice-candidate payload, an array of them, or a signal bundle with iceCandidates");
         return;
       }
 
-      if (Array.isArray(signal.iceCandidates)) {
-        for (const candidateSignal of signal.iceCandidates) {
-          if (candidateSignal.type === "ice-candidate") {
-            await rtc.addIceCandidate(candidateSignal.candidate);
-          }
+      let added = 0;
+      for (const candidateSignal of candidateSignals) {
+        if (candidateSignal && candidateSignal.type === "ice-candidate") {
+          await rtc.addIceCandidate(candidateSignal.candidate);
+          added += 1;
         }
-        return;
       }
 
-      alert("Expected an ice-candidate payload or a signal bundle with iceCandidates");
+      if (added === 0) {
+        alert("No valid ice-candidate entries found in the pasted JSON");
+      }
     });
 
     document.getElementById("btnScreen").addEventListener("click", async () => {
